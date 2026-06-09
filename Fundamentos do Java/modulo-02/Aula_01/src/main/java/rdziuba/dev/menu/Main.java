@@ -1,5 +1,6 @@
+package rdziuba.dev.menu;
+
 import com.google.gson.Gson;
-import rdziuba.dev.menu.MenuItem;
 
 import java.math.BigDecimal;
 

@@ -3,6 +3,7 @@ package rdziuba.dev.menu;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Database {
 
@@ -21,9 +22,9 @@ public class Database {
         return items;
     }
 
-    public MenuItem getById(Long id) {
+    public Optional<MenuItem> getById(Long id) {
         List<MenuItem> menuItems = this.getMenuItems();
-        return menuItems.stream().filter(menuItem -> menuItem.id().equals(id)).findFirst().orElse(null);
+        return menuItems.stream().filter(menuItem -> menuItem.id().equals(id)).findFirst();
     }
 
 }

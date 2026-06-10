@@ -1,6 +1,7 @@
 package rdziuba.dev.menu;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Main {
     static void main(String[] args) {
@@ -21,9 +22,13 @@ public class Main {
         menuItems.forEach(System.out::println);
 
         System.out.println("------------");
-        System.out.println(database.getById(5L));
+        Optional<MenuItem> item = database.getById(5L);
+        String responseText = item.map(MenuItem::toString).orElse("Item não encontrado");
+        System.out.println(responseText);
         System.out.println("------------");
-        System.out.println(database.getById(3L));
+        Optional<MenuItem> item1 = database.getById(3L);
+        responseText = item1.map(MenuItem::toString).orElse("Item não encontrado");
+        System.out.println(responseText);
 
     }
 }

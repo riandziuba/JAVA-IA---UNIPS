@@ -12,6 +12,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ServerWithSocket {
+    private static final Object ITEMS_FILE_LOCK = new Object();
+    /*
+    * Thread Safe Equivalents
+    * ArrayList = CopyOnWriteArratList
+    * HashSet/LinkedHashSet = CopyOnWriteArratSet
+    * TreeSet = ConcurrentSkipListSet
+    * HashMap/LikendHashMap = ConcurrentHashMap
+    * TreeMap = ConcurrentSkipListMap
+    * */
     static void main(String[] args) throws Exception {
         try (ExecutorService executorService = Executors.newFixedThreadPool(50)) {
             try (ServerSocket serverSocket = new ServerSocket(8000)) {
@@ -47,16 +56,20 @@ public class ServerWithSocket {
             Thread.sleep(250);
             String response = "";
             Path path = Path.of("items.json");
-            String json = Files.readString(path);
             String requestLineReturn = "";
             switch (method) {
                 case "GET":
                     switch (requestURI) {
                         case "/items":
-                            response = json;
+                            synchronized (ITEMS_FILE_LOCK) {
+                                response = Files.readString(path);
+                            }
                             break;
                         case "/items/total":
-                            int total = new JSONArray(json).length();
+                            int total;
+                            synchronized (ITEMS_FILE_LOCK) {
+                                total = new JSONArray(Files.readString(path)).length();
+                            }
                             response = new JSONObject().put("total", total).toString();
                             break;
                     }
@@ -73,13 +86,15 @@ public class ServerWithSocket {
                         case "/items":
                             try {
                                 JSONObject itemJson = new JSONObject(body);
-                                JSONArray items = new JSONArray(json);
-                                items.put(itemJson);
-                                Files.writeString(path, items.toString());
+                                synchronized (ITEMS_FILE_LOCK) {
+                                    JSONArray items = new JSONArray(Files.readString(path));
+                                    items.put(itemJson);
+                                    Files.writeString(path, items.toString());
+                                }
                                 response = new JSONObject().put("message", "Item cadastrado com sucesso").toString();
                                 requestLineReturn = "HTTP/1.1 201 Created";
                             } catch (Exception e) {
-                                response = new JSONObject().put("message", "Item não cadastrado, tente novamente mais tarde").toString();
+                                response = new JSONObject().put("message", "Item não cadastrado, tente novamente mais tarde. Erro:" + e.getMessage()).toString();
                                 requestLineReturn = "HTTP/1.1 500 Internal Server Error";
                             }
                             break;

@@ -7,8 +7,10 @@ import org.json.JSONObject;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.math.BigDecimal;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,6 +42,7 @@ public class ServerWithSocket {
             } while (clientIS.available() > 0);
             String request = stringBuilder.toString();
             String[] requestChunks = request.split("\\r\\n\\r\\n");
+            String body = requestChunks.length == 1 ? "{}" : requestChunks[1];
             String requestLineAndHeaders = requestChunks[0];
             String[] requestLineAndHeadersChunk = requestLineAndHeaders.split("\\r\\n");
             String requestLine = requestLineAndHeadersChunk[0];
@@ -52,6 +55,7 @@ public class ServerWithSocket {
             Thread.sleep(250);
             String response = "";
             String requestLineReturn = "";
+            JSONObject jsonBody = new JSONObject(body);
             switch (method) {
                 case "GET":
                     switch (requestURI) {
@@ -62,8 +66,20 @@ public class ServerWithSocket {
                             int total = DATABASE.totalOfItems();
                             response = new JSONObject().put("total", total).toString();
                             break;
+                        default:
+                            if (requestURI.startsWith("/items/")) {
+                                Long id = Long.parseLong(requestURI.split("/items/")[1]);
+                                Optional<MenuItem> itemOptional = DATABASE.getById(id);
+                                if (itemOptional.isEmpty()) {
+                                    requestLineReturn = "HTTP/1.1 404 Not Found";
+                                    response = new JSONObject().put("message", "Item id (" + id + ") não existe").toString();
+                                    break;
+                                }
+                                response = itemOptional.get().toJson().toString();
+                            }
+
                     }
-                    requestLineReturn = "HTTP/1.1 200 OK";
+                    if (requestLineReturn.isEmpty()) requestLineReturn = "HTTP/1.1 200 OK";
                 break;
                 case "POST":
                     if (requestChunks.length == 1) {
@@ -71,11 +87,10 @@ public class ServerWithSocket {
                         response = new JSONObject().put("message", "Item não cadastrado, não há dados").toString();
                         break;
                     }
-                    String body = requestChunks[1];
                     switch (requestURI) {
                         case "/items":
                             try {
-                                JSONObject itemJson = new JSONObject(body);
+                                JSONObject itemJson = jsonBody;
                                 DATABASE.add(MenuItem.fromJson(itemJson));
                                 response = new JSONObject().put("message", "Item cadastrado com sucesso").toString();
                                 requestLineReturn = "HTTP/1.1 201 Created";
@@ -85,12 +100,52 @@ public class ServerWithSocket {
                             }
                             break;
                     }
+                case "DELETE":
+                    if (requestURI.startsWith("/items/")) {
+                            Long id = Long.parseLong(requestURI.split("/items/")[1]);
+                            boolean deleted = DATABASE.removeById(id);
+                            if (deleted) {
+                                response = "";
+                                requestLineReturn = "HTTP/1.1 204 No Content";
+                                break;
+                            }
+                            Optional<MenuItem> itemOptional = DATABASE.getById(id);
+                            if (itemOptional.isEmpty()) {
+                                response = "";
+                                requestLineReturn = "HTTP/1.1 404 Not Found";
+                                break;
+                            }
+                            response = new JSONObject("message", "O item não pode ser deletado").toString();
+                            requestLineReturn = "HTTP/1.1 400 Bad Request";
+                        }
+                    break;
+                case "PATCH":
+                    if (requestURI.startsWith("/items/")) {
+                        Long id = Long.parseLong(requestURI.split("/items/")[1]);
+                        BigDecimal newPrice = jsonBody.getBigDecimal("newPrice");
+                        boolean updated = DATABASE.updatePriceById(id, newPrice);
+                        if (updated) {
+                            response = "";
+                            requestLineReturn = "HTTP/1.1 204 No Content";
+                            break;
+                        }
+                        Optional<MenuItem> itemOptional = DATABASE.getById(id);
+                        if (itemOptional.isEmpty()) {
+                            response = "";
+                            requestLineReturn = "HTTP/1.1 404 Not Found";
+                            break;
+                        }
+                        response = new JSONObject("message", "O preço do item não pode ser alterado").toString();
+                        requestLineReturn = "HTTP/1.1 400 Bad Request";
+                    }
+
+
             }
 
 
             OutputStream clientOS = clientSocket.getOutputStream();
             PrintStream clientOut = new PrintStream(clientOS);
-            if (response.isEmpty()) {
+            if (response.isEmpty() && requestLineReturn.isEmpty()) {
                 clientOut.println("HTTP/1.1 404 Not Found");
                 clientOut.println();
             } else {

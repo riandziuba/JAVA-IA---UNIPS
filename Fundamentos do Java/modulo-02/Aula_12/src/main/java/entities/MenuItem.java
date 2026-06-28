@@ -2,10 +2,11 @@ package entities;
 
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 public record MenuItem(Long id, String name, String description, MenuCategory category, BigDecimal price,
-                       BigDecimal priceWithDiscount) {
+                       BigDecimal priceWithDiscount) implements Serializable {
 
     public JSONObject toJson() {
         return new JSONObject()

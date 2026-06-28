@@ -4,12 +4,11 @@ import db.MySqlDatabase;
 import entities.MenuItem;
 import org.json.JSONObject;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -57,6 +56,14 @@ public class ServerWithSocket {
             String[] requestLineAndHeadersChunk = requestLineAndHeaders.split("\\r\\n");
             String requestLine = requestLineAndHeadersChunk[0];
             String[] requestLineChunks = requestLine.split(" ");
+            String mediaType = "";
+            for (String header : requestLineAndHeadersChunk) {
+                logger.fine(header);
+                if (header.contains("Accept")) {
+                    mediaType = header.replace("Accept: ", "");
+                    logger.info(mediaType);
+                }
+            }
 
             String method = requestLineChunks[0];
             String requestURI = requestLineChunks[1];
@@ -66,11 +73,12 @@ public class ServerWithSocket {
             logger.fine(() -> "RequestURI: " + requestURI);
             logger.fine(() -> "Http version: " + httpVersion);
             Thread.sleep(250);
-            String response = "";
+            byte[] response = "".getBytes();
             String requestLineReturn = "";
             JSONObject jsonBody = new JSONObject(body);
             OutputStream clientOS = clientSocket.getOutputStream();
             PrintStream clientOut = new PrintStream(clientOS);
+            List<MenuItem> menuItems = DATABASE.getMenuItems();
 
             String contentType = "Content-type: application/json; charset=UTF-8";
             try {
@@ -84,7 +92,6 @@ public class ServerWithSocket {
                                 DateTimeFormatter formatterMonthYear = DateTimeFormatter.ofPattern("LLLL/yyyy").withLocale(locale);
                                 DateTimeFormatter formatterDayMonthYear = DateTimeFormatter.ofPattern("d 'de' LLLL 'de' yyyy HH:mm").withLocale(locale);
                                 NumberFormat numberFormat = NumberFormat.getCurrencyInstance(locale);
-                                List<MenuItem> menuItems = DATABASE.getMenuItems();
                                 StringBuilder htmlAllItems = new StringBuilder();
                                 for (MenuItem menuItem : menuItems) {
                                     String htmlItemPrice;
@@ -135,15 +142,24 @@ public class ServerWithSocket {
                                             </body>
                                             </html>
                                         """.formatted(htmlAllItems.toString(), formatterDayMonthYear.format(now), formatterMonthYear.format(now));
-                                    response = html;
+                                    response = html.getBytes(StandardCharsets.UTF_8);
                                 break;
 
                             case "/items":
-                                response = DATABASE.menuItemsToJson().toString();
+                                if (mediaType.equals("application/x-java-serialized-object")) {
+                                    contentType = "Content-type: " + mediaType + "charset=UTF-8";
+                                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                                    ObjectOutputStream oos = new ObjectOutputStream(bos);
+                                    oos.writeObject(menuItems);
+                                    response = bos.toByteArray();
+                                } else {
+                                    response = DATABASE.menuItemsToJson().toString().getBytes(StandardCharsets.UTF_8);
+                                }
+
                                 break;
                             case "/items/total":
                                 int total = DATABASE.totalOfItems();
-                                response = new JSONObject().put("total", total).toString();
+                                response = new JSONObject().put("total", total).toString().getBytes(StandardCharsets.UTF_8);
                                 break;
                             default:
                                 if (requestURI.startsWith("/items/")) {
@@ -151,10 +167,10 @@ public class ServerWithSocket {
                                     Optional<MenuItem> itemOptional = DATABASE.getById(id);
                                     if (itemOptional.isEmpty()) {
                                         requestLineReturn = "HTTP/1.1 404 Not Found";
-                                        response = new JSONObject().put("message", "Item id (" + id + ") não existe").toString();
+                                        response = new JSONObject().put("message", "Item id (" + id + ") não existe").toString().getBytes(StandardCharsets.UTF_8);
                                         break;
                                     }
-                                    response = itemOptional.get().toJson().toString();
+                                    response = itemOptional.get().toJson().toString().getBytes(StandardCharsets.UTF_8);
                                 }
 
                         }
@@ -163,7 +179,7 @@ public class ServerWithSocket {
                     case "POST":
                         if (requestChunks.length == 1) {
                             requestLineReturn = "HTTP/1.1 400 Bad Request";
-                            response = new JSONObject().put("message", "Item não cadastrado, não há dados").toString();
+                            response = new JSONObject().put("message", "Item não cadastrado, não há dados").toString().getBytes(StandardCharsets.UTF_8);
                             break;
                         }
                         switch (requestURI) {
@@ -171,10 +187,10 @@ public class ServerWithSocket {
                                 try {
                                     JSONObject itemJson = jsonBody;
                                     DATABASE.add(MenuItem.fromJson(itemJson));
-                                    response = new JSONObject().put("message", "Item cadastrado com sucesso").toString();
+                                    response = new JSONObject().put("message", "Item cadastrado com sucesso").toString().getBytes(StandardCharsets.UTF_8);
                                     requestLineReturn = "HTTP/1.1 201 Created";
                                 } catch (Exception e) {
-                                    response = new JSONObject().put("message", "Item não cadastrado, tente novamente mais tarde. Erro:" + e.getMessage()).toString();
+                                    response = new JSONObject().put("message", "Item não cadastrado, tente novamente mais tarde. Erro:" + e.getMessage()).toString().getBytes(StandardCharsets.UTF_8);
                                     requestLineReturn = "HTTP/1.1 500 Internal Server Error";
                                 }
                                 break;
@@ -184,17 +200,15 @@ public class ServerWithSocket {
                             Long id = Long.parseLong(requestURI.split("/items/")[1]);
                             boolean deleted = DATABASE.removeById(id);
                             if (deleted) {
-                                response = "";
                                 requestLineReturn = "HTTP/1.1 204 No Content";
                                 break;
                             }
                             Optional<MenuItem> itemOptional = DATABASE.getById(id);
                             if (itemOptional.isEmpty()) {
-                                response = "";
                                 requestLineReturn = "HTTP/1.1 404 Not Found";
                                 break;
                             }
-                            response = new JSONObject("message", "O item não pode ser deletado").toString();
+                            response = new JSONObject("message", "O item não pode ser deletado").toString().getBytes(StandardCharsets.UTF_8);
                             requestLineReturn = "HTTP/1.1 400 Bad Request";
                         }
                         break;
@@ -204,17 +218,15 @@ public class ServerWithSocket {
                             BigDecimal newPrice = jsonBody.getBigDecimal("newPrice");
                             boolean updated = DATABASE.updatePriceById(id, newPrice);
                             if (updated) {
-                                response = "";
                                 requestLineReturn = "HTTP/1.1 204 No Content";
                                 break;
                             }
                             Optional<MenuItem> itemOptional = DATABASE.getById(id);
                             if (itemOptional.isEmpty()) {
-                                response = "";
                                 requestLineReturn = "HTTP/1.1 404 Not Found";
                                 break;
                             }
-                            response = new JSONObject("message", "O preço do item não pode ser alterado").toString();
+                            response = new JSONObject("message", "O preço do item não pode ser alterado").toString().getBytes(StandardCharsets.UTF_8);
                             requestLineReturn = "HTTP/1.1 400 Bad Request";
                         }
                 }
@@ -222,14 +234,15 @@ public class ServerWithSocket {
                 clientOut.print("HTTP/1.1 500 Internal Server Error \r\n\r\n");
                 clientOut.print(e.getMessage()+ "\r\n");
                 logger.log(Level.SEVERE, e, () -> "Erro ao processar metodo " + method + " " + requestURI);
+                return;
             }
 
-            if (response.isEmpty() && requestLineReturn.isEmpty()) {
+            if (response.length == 0 && requestLineReturn.isEmpty()) {
                 clientOut.print("HTTP/1.1 404 Not Found\r\n\r\n");
             } else {
-                clientOut.print(requestLineReturn + "\r\n");
-                clientOut.print(contentType + "\r\n\r\n");
-                clientOut.print(response + "\r\n");
+                clientOS.write((requestLineReturn + "\r\n").getBytes());
+                clientOS.write((contentType + "\r\n\r\n").getBytes());
+                clientOS.write(response);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

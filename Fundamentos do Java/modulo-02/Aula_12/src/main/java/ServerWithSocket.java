@@ -10,7 +10,13 @@ import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -20,6 +26,7 @@ public class ServerWithSocket {
     private static final Logger logger = Logger.getLogger(ServerWithSocket.class.getName());
     private static final IDatabase DATABASE = new MySqlDatabase();
     static void main(String[] args) throws Exception {
+        Locale.setDefault(Locale.of("pt", "BR"));
         ExecutorService executorService = Executors.newFixedThreadPool(50);
         try {
             try (ServerSocket serverSocket = new ServerSocket(8000)) {
@@ -64,10 +71,73 @@ public class ServerWithSocket {
             JSONObject jsonBody = new JSONObject(body);
             OutputStream clientOS = clientSocket.getOutputStream();
             PrintStream clientOut = new PrintStream(clientOS);
+
+            String contentType = "Content-type: application/json; charset=UTF-8";
             try {
                 switch (method) {
                     case "GET":
                         switch (requestURI) {
+                            case "/", "/en":
+                                Locale locale = request.contains("/en") ? Locale.US : Locale.of("pt", "BR");
+                                ResourceBundle messages = ResourceBundle.getBundle("messages", locale);
+                                LocalDateTime now = LocalDateTime.now();
+                                DateTimeFormatter formatterMonthYear = DateTimeFormatter.ofPattern("LLLL/yyyy").withLocale(locale);
+                                DateTimeFormatter formatterDayMonthYear = DateTimeFormatter.ofPattern("d 'de' LLLL 'de' yyyy HH:mm").withLocale(locale);
+                                NumberFormat numberFormat = NumberFormat.getCurrencyInstance(locale);
+                                List<MenuItem> menuItems = DATABASE.getMenuItems();
+                                StringBuilder htmlAllItems = new StringBuilder();
+                                for (MenuItem menuItem : menuItems) {
+                                    String htmlItemPrice;
+                                    String categoryPath = "MenuCategory.MenuItem.";
+                                    if (menuItem.priceWithDiscount() == null) {
+                                        htmlItemPrice = "<strong>" + numberFormat.format(menuItem.price()) + "</strong>";
+                                    } else {
+                                        htmlItemPrice = "<mark>Em promoção</mark> <strong>" + numberFormat.format(menuItem.priceWithDiscount()) + "</strong> <s>" + numberFormat.format(menuItem.price()) + "</s>";
+                                    }
+                                    String htmlItem = """
+                                            <article>
+                                                    <kbd>%s</kbd>
+                                                    <h3>%s</h3>
+                                                    <p>%s</p>
+                                                    %s
+                                                </article>
+                                            """.formatted(messages.getString(categoryPath.concat(menuItem.category().name())), menuItem.name(), menuItem.description(), htmlItemPrice);
+                                    htmlAllItems.append(htmlItem);
+                                }
+                                contentType = "Content-type: text/html; charset=UTF-8";
+
+                                String html = """
+                                        <!DOCTYPE html>
+                                        <html lang="en">
+                                        <head>
+                                            <meta charset="UTF-8">
+                                            <title>Florinda Eats - Cardápio</title>
+                                            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.min.css">
+                                        </head>
+                                        <body>
+                                        
+                                        <header class="container">
+                                            <hgroup>
+                                                <h1>Florinda Eats</h1>
+                                                <p>O sabor da Vila direto pra você</p>
+                                            </hgroup>
+                                        </header>
+                                        
+                                        <main class="container">
+                                            <h2>Cardápio</h2>
+                                            %s
+                                        </main>
+                                       
+                                            <footer class="container">
+                                                <p><small><em>Preços de acordo com %s</em></small></p>
+                                                <p><strong>Florinda Eats</strong> Todos os direitos reservados - %s</p>
+                                            </footer>
+                                            </body>
+                                            </html>
+                                        """.formatted(htmlAllItems.toString(), formatterDayMonthYear.format(now), formatterMonthYear.format(now));
+                                    response = html;
+                                break;
+
                             case "/items":
                                 response = DATABASE.menuItemsToJson().toString();
                                 break;
@@ -149,20 +219,17 @@ public class ServerWithSocket {
                         }
                 }
             } catch (Exception e) {
-                clientOut.println("HTTP/1.1 500 Internal Server Error");
-                clientOut.println();
-                clientOut.println(e.getMessage());
+                clientOut.print("HTTP/1.1 500 Internal Server Error \r\n\r\n");
+                clientOut.print(e.getMessage()+ "\r\n");
                 logger.log(Level.SEVERE, e, () -> "Erro ao processar metodo " + method + " " + requestURI);
             }
 
             if (response.isEmpty() && requestLineReturn.isEmpty()) {
-                clientOut.println("HTTP/1.1 404 Not Found");
-                clientOut.println();
+                clientOut.print("HTTP/1.1 404 Not Found\r\n\r\n");
             } else {
-                clientOut.println(requestLineReturn);
-                clientOut.println("Content-type: application/json; charset=UTF-8");
-                clientOut.println();
-                clientOut.println(response);
+                clientOut.print(requestLineReturn + "\r\n");
+                clientOut.print(contentType + "\r\n\r\n");
+                clientOut.print(response + "\r\n");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -1,3 +1,22 @@
 .idea
 .DS_Store
-Fundamentos do Java/modulo-01/Aula 05/benchmark.txt
+*.iml
+.vscode/
+target/
+build/
+out/
+.gradle/
+*.class
+*.jar
+*.log
+*.jmx
+mvnw
+mvnw.cmd
+gradlew
+gradlew.bat
+gradle-wrapper.jar
+**/src/main/docker/
+benchmark.txt
+itemsbkp.json
+mise.toml
+testemain.java

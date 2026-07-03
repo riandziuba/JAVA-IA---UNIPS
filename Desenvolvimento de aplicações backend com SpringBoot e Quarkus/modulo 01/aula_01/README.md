@@ -53,6 +53,14 @@ You can then execute your native executable with: `./target/unipds-m1-1.0.0-SNAP
 
 If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
 
+## Setting JWT Token
+
+To set the JWT token for testing authenticated endpoints, run:
+
+```shell script
+set token $(curl https://raw.githubusercontent.com/eldermoraes/unipds/main/jwt-token/quarkus.jwt.token -s)
+```
+
 ## Related Guides
 
 - REST ([guide](https://quarkus.io/guides/rest)): Build RESTful web services and APIs using Jakarta REST (formerly JAX-RS)

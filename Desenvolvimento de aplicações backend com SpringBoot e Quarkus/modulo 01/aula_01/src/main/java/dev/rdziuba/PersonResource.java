@@ -1,6 +1,7 @@
 package dev.rdziuba;
 
 import dev.rdziuba.entities.Person;
+import io.micrometer.core.annotation.Counted;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -13,6 +14,7 @@ import java.util.List;
 public class PersonResource {
 
     @GET
+    @Counted(value = "counted.getPerson")
     public List<Person> getPerson() {
         return Person.listAll();
     }

@@ -13,21 +13,4 @@ public class HelloController {
     public String sayHello() {
         return "Hello World";
     }
-
-    @GetMapping("products")
-    public Product getProduct() {
-        Product product = new Product();
-        product.setId(12345);
-        product.setName("Computer");
-        product.setPrice(1500.0);
-
-        return product;
-    }
-
-    @PostMapping("products")
-    public String addNewProduct(@RequestBody Product product) {
-        System.out.println("Product received:");
-        System.out.println(product.getId() + " " + product.getName() + " " + product.getPrice());
-        return "ok";
-    }
 }

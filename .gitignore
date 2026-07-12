@@ -10,8 +10,10 @@ out/
 *.jar
 *.log
 *.jmx
-mvnw
-mvnw.cmd
+/mvnw
+/mvnw.cmd
+.mvn/wrapper/maven-wrapper.jar
+HELP.md
 gradlew
 gradlew.bat
 gradle-wrapper.jar

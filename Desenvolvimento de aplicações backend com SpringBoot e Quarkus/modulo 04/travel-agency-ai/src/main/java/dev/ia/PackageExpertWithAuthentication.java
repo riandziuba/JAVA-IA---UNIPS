@@ -3,6 +3,7 @@ package dev.ia;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.guardrail.InputGuardrails;
 import io.quarkiverse.langchain4j.RegisterAiService;
 import io.quarkiverse.langchain4j.mcp.runtime.McpToolBox;
 
@@ -19,5 +20,6 @@ Se a resposta para uma pergunta não estiver nos documentos, você deve responde
 """)
     @McpToolBox("booking-server")
     @UserMessage("Do what user is asking {message}. The user used for authentication is {username}.")
+    @InputGuardrails(InjectionGuard.class)
     String chat(@MemoryId String memoryId, String message, String username);
 }

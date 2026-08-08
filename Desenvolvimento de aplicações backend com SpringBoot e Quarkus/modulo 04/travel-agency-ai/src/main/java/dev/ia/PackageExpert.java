@@ -4,6 +4,7 @@ import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.guardrail.InputGuardrails;
+import dev.langchain4j.service.guardrail.OutputGuardrails;
 import io.quarkiverse.langchain4j.RegisterAiService;
 import io.quarkiverse.langchain4j.mcp.runtime.McpToolBox;
 
@@ -20,5 +21,6 @@ Se a resposta para uma pergunta não estiver nos documentos, você deve responde
 """)
     @McpToolBox("booking-server")
     @InputGuardrails(InjectionGuard.class)
+    @OutputGuardrails(ToneGuardrail.class)
     String chat(@MemoryId String memoryId, @UserMessage String userMessage);
 }

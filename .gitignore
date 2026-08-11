@@ -22,3 +22,5 @@ benchmark.txt
 itemsbkp.json
 mise.toml
 testemain.java
+.gitignore
+.dockerignore

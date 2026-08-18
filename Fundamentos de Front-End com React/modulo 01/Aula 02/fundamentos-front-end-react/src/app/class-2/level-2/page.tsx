@@ -1,5 +1,5 @@
-import { CounterGlobal } from "@/components/CounterGlobal";
-import { CounterGlobalValue } from "@/components/CounterGlobalValue";
+import { CounterGlobal } from "@/components/class-2/CounterGlobal";
+import { CounterGlobalValue } from "@/components/class-2/CounterGlobalValue";
 
 
 const Page = async () => (

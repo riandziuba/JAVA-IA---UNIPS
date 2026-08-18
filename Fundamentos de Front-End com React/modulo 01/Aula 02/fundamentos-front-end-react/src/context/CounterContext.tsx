@@ -39,7 +39,7 @@ export default function CounterProvider({ children }: { children: ReactNode }) {
 
 
     useEffect(() => {
-        if (counter) localStorage.setItem('counter', counter.toString());
+        if (counter != null) localStorage.setItem('counter', counter.toString());
     }, [counter])
 
 

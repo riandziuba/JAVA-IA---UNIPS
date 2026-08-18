@@ -1,4 +1,4 @@
-import { Counter } from "@/components/Counter";
+import { Counter } from "@/components/class-2/Counter";
 
 const Page = async () => (
   <div>

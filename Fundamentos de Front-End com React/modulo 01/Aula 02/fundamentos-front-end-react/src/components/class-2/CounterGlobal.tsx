@@ -10,16 +10,16 @@ export const CounterGlobal = () => {
         <p>Numero atual: {counter}</p>
         <div className="flex gap-x-2">
             <Button onClick={() => {
-                setCounter((providedCounter) => providedCounter - 3);
+                setCounter((providedCounter) => (providedCounter ?? 0) - 3);
             }}>-3</Button>
             <Button onClick={() => {
-                setCounter((providedCounter) => providedCounter - 1);
+                setCounter((providedCounter) => (providedCounter ?? 0) - 1);
             }}>-1</Button>
             <Button onClick={() => {
-                setCounter((providedCounter) => providedCounter + 1);
+                setCounter((providedCounter) => (providedCounter ?? 0) + 1);
             }}>+1</Button>
             <Button onClick={() => {
-                setCounter((providedCounter) => providedCounter + 3);
+                setCounter((providedCounter) => (providedCounter ?? 0) + 3);
             }}>+3</Button>
         </div>
 

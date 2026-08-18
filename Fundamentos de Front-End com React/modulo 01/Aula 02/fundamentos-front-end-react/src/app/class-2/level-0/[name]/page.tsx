@@ -1,7 +1,7 @@
 
-import { Hobbies } from "@/components/Hobbies";
-import { ImageComponent } from "@/components/ImageComponent";
-import { MyName } from "@/components/MyName";
+import { Hobbies } from "@/components/class-2/Hobbies";
+import { ImageComponent } from "@/components/class-2/ImageComponent";
+import { MyName } from "@/components/class-2/MyName";
 import Link from "next/link";
 // arrow function
 // export default function Page() {
@@ -27,7 +27,7 @@ const Page = async ({ params }: myPageParams) => {
         <p>Estou Aprendendo:</p>
         <ImageComponent />
       </div>
-      <Link className="underline" href="/level-0">Voltar</Link>
+      <Link className="underline" href="/class-2/level-0">Voltar</Link>
     </div>
   )
 };

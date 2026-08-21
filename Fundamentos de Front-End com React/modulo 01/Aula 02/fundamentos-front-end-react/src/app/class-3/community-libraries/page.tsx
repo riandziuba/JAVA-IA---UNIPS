@@ -8,7 +8,7 @@ export default function BlogPage() {
         'https://api.vercel.app/blog',
         fetcher,
         {
-            refreshInterval: 1000
+            refreshInterval: 10000
         }
     )
 

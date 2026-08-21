@@ -1,13 +1,8 @@
 "use client"
-import { FC, MouseEventHandler, ReactNode } from "react"
+import { ButtonHTMLAttributes, FC } from "react"
 
-type buttonProps = {
-    onClick: MouseEventHandler<HTMLButtonElement>;
-    children: ReactNode
-}
-
-export const Button: FC<buttonProps> = ({ onClick, children }) => {
+export const Button: FC<ButtonHTMLAttributes<HTMLButtonElement>> = ({ onClick, children, ...props }) => {
     return (
-        <button className="border border-blue-500 px-4 py-1 rounded cursor-pointer bg-blue-500 hover:bg-blue-900 text-{#fff} font-bold" onClick={onClick}>{children}</button>
+        <button className="border border-blue-500 p-2 rounded cursor-pointer bg-blue-500 hover:bg-blue-900 text-{#fff} font-bold" onClick={onClick} {...props}>{children}</button>
     )
 }

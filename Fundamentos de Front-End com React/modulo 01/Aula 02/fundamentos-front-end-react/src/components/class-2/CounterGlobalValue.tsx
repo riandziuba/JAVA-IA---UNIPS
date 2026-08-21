@@ -1,6 +1,6 @@
 "use client"
 import { useContext } from "react"
-import { CounterContext } from "@/context/CounterContext"
+import { CounterContext } from "@/context/class-2/CounterContext"
 
 export const CounterGlobalValue = () => {
     const { counter } = useContext(CounterContext)

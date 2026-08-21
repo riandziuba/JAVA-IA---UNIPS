@@ -7,7 +7,11 @@ const pages = [
   { href: "/class-2/level-2", label: "Nível 2" },
   { href: "/class-3/client-side", label: "Aula 03 - client-side" },
   { href: "/class-3/sever-side", label: "Aula 03 - server-side" },
-  { href: "/class-3/community-libraries", label: "Aula 03 - community-libraries" }
+  { href: "/class-3/community-libraries", label: "Aula 03 - community-libraries" },
+  { href: "/login", label: "Aula 04 - Login" },
+  { href: "/dashboard", label: "Aula 04 - Dashboard" },
+  { href: "/test-server", label: "Aula 04 - Test Server" },
+  { href: "/test-client", label: "Aula 04 - Test Client" }
 ];
 
 const Home = () => (

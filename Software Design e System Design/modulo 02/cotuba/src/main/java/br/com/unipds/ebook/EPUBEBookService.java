@@ -1,6 +1,8 @@
 package br.com.unipds.ebook;
 
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.GuideReference;
@@ -11,13 +13,15 @@ import nl.siegmann.epublib.service.MediatypeService;
 import java.io.IOException;
 import java.nio.file.Files;
 
+@ApplicationScoped
+@Named("EPUB")
 public class EPUBEBookService implements IEBookService {
     public void generate(Ebook ebook) {
         try {
             var epub = new Book();
 
             epub.getMetadata().addTitle(ebook.getTitle());
-            epub.getMetadata().addAuthor(new Author(ebook.getAuthor()));
+            epub.getMetadata().addAuthor(new Author(escape(ebook.getAuthor())));
 
             boolean[] ehPrimeiroCapitulo = {true};
 
@@ -34,9 +38,9 @@ public class EPUBEBookService implements IEBookService {
                                   %s
                                 </body>
                               </html>
-                            """.formatted(chapterRaw.getTitle(), chapterRaw.getHtml());
+                            """.formatted(escape(chapterRaw.getTitle()), escape(chapterRaw.getHtml()));
                     var chapter = new Resource(epubHtml.getBytes(), MediatypeService.XHTML);
-                    epub.addSection(chapterRaw.getTitle(), chapter);
+                    epub.addSection(escape(chapterRaw.getTitle()), chapter);
 
                     if (ehPrimeiroCapitulo[0]) {
                         epub.getGuide().addReference(new GuideReference(chapter, "text", "Start Reading"));
@@ -60,5 +64,10 @@ public class EPUBEBookService implements IEBookService {
         } catch (Exception ex) {
             throw new IllegalStateException("Erro ao gerar EPUB: " + ebook.getFileName().toAbsolutePath(), ex);
         }
+    }
+
+    public static String escape(String text) {
+        if (text == null) return "";
+        return text.replaceAll("&(?!(?:[a-zA-Z]+|#\\d+|#x[0-9a-fA-F]+);)", "&amp;");
     }
 }

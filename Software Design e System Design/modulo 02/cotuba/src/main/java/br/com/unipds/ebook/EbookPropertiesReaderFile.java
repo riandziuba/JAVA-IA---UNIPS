@@ -1,14 +1,15 @@
-package br.com.unipds;
+package br.com.unipds.ebook;
 
-import br.com.unipds.ebook.Ebook;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
-public class EbookPropertiesReader {
+@ApplicationScoped
+public class EbookPropertiesReaderFile implements IEbookPropertiesReader {
 
     public void read(Path sourceDir, Ebook ebook) {
         Path propertiesFile = sourceDir.resolve("ebook.properties");
@@ -18,8 +19,8 @@ public class EbookPropertiesReader {
         }
 
         Properties properties = new Properties();
-        try (InputStream inputStream = Files.newInputStream(propertiesFile)) {
-            properties.load(inputStream);
+        try (Reader reader = Files.newBufferedReader(propertiesFile)) {
+            properties.load(reader);
             String propertyTitle = "title";
             String propertyAuthor = "author";
             String title = properties.getProperty(propertyTitle);

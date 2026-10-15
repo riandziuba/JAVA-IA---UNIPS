@@ -1,5 +1,6 @@
 package br.com.unipds.options;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.commons.cli.*;
 
 import java.io.File;
@@ -8,10 +9,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
-public class OptionsService {
+@ApplicationScoped
+public class OptionsUserInputService implements IOptionsService {
     private final Options options = new Options();
 
-    public OptionsService() {
+    public OptionsUserInputService() {
         options.addOption(new Option("d", "dir", true,
                 "Diretório que contém os arquivos md. Default: diretório atual."));
 

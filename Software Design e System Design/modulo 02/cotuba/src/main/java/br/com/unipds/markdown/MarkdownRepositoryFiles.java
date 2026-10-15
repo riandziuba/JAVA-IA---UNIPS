@@ -1,6 +1,7 @@
-package br.com.unipds;
+package br.com.unipds.markdown;
 
 import br.com.unipds.ebook.Chapter;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -11,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class MarkdownRepository {
+@ApplicationScoped
+public class MarkdownRepositoryFiles implements IMarkdownRepository {
     public List<Chapter> getChapters(Path sourceDir) {
         List<Chapter> chapters = new ArrayList<>();
         PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/*.md");

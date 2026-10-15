@@ -1,6 +1,7 @@
-package br.com.unipds;
+package br.com.unipds.markdown;
 
 import br.com.unipds.ebook.Chapter;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.Heading;
 import org.commonmark.node.Node;
@@ -8,13 +9,12 @@ import org.commonmark.node.Text;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
-import java.nio.file.Path;
 import java.util.List;
 
-public class MarkdownRenderizerService {
-    public List<Chapter> render(Path sourceDir) {
-        MarkdownRepository markdownRepository = new MarkdownRepository();
-        List<Chapter> chapters = markdownRepository.getChapters(sourceDir);
+@ApplicationScoped
+public class MarkdownRenderizerCommonmarkService implements IMarkdownRenderizerService {
+
+    public void render(List<Chapter> chapters) {
         for (Chapter chapter : chapters) {
             try {
                 Parser parser = Parser.builder().build();
@@ -40,6 +40,5 @@ public class MarkdownRenderizerService {
                 throw new IllegalStateException("Erro ao fazer parse do arquivo " + chapter.getMarkDownFile(), ex);
             }
         }
-        return chapters;
     }
 }

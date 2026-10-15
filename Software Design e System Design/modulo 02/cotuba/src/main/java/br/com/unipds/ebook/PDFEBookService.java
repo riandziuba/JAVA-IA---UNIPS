@@ -1,6 +1,5 @@
 package br.com.unipds.ebook;
 
-import br.com.unipds.options.OptionsDTO;
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfOutline;
@@ -13,34 +12,28 @@ import com.itextpdf.layout.element.IElement;
 import com.itextpdf.layout.properties.AreaBreakType;
 
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class PDFEBookService implements IEBookService {
 
-    public void generate(OptionsDTO options) {
-        try (var writer = new PdfWriter(Files.newOutputStream(options.outputFileName()));
+    public void generate(Ebook ebook) {
+        try (var writer = new PdfWriter(Files.newOutputStream(ebook.getFileName()));
              var pdf = new PdfDocument(writer);
              var pdfDocument = new Document(pdf)) {
 
-            //TODO: definir título e autor para o livro
-            pdf.getDocumentInfo().setTitle("Livro");
-            pdf.getDocumentInfo().setAuthor("Autor");
+            pdf.getDocumentInfo().setTitle(ebook.getTitle());
+            pdf.getDocumentInfo().setAuthor(ebook.getAuthor());
 
-            List<Path> mdFiles = this.getMDPaths(options.sourceDir());
-            mdFiles.forEach(mdFile -> {
-
+            ebook.getAllChapters().forEach(chapterRaw -> {
                 try {
-                    String html = this.extractHtml(mdFile);
 
-                    List<IElement> convertToElements = HtmlConverter.convertToElements(html);
+                    List<IElement> convertToElements = HtmlConverter.convertToElements(chapterRaw.getHtml());
 
                     if (pdf.getNumberOfPages() == 0) {
                         pdf.addNewPage();
+                    } else {
+                        pdfDocument.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
                     }
                     PdfOutline rootOutline = pdf.getOutlines(false);
                     if (rootOutline == null) {
@@ -48,23 +41,20 @@ public class PDFEBookService implements IEBookService {
                         rootOutline = pdf.getOutlines(false);
                     }
 
-                    // TODO: usar título do capítulo
-                    PdfOutline chapterOutline = rootOutline.addOutline("Capítulo");
+                    PdfOutline chapterOutline = rootOutline.addOutline(chapterRaw.getTitle());
                     chapterOutline.addDestination(PdfExplicitDestination.createFit(pdf.getLastPage()));
 
                     for (IElement element : convertToElements) {
                         pdfDocument.add((IBlockElement) element);
                     }
                     // TODO: não adicionar página depois do último capítulo
-                    pdfDocument.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
 
                 } catch (Exception ex) {
-                    throw new IllegalStateException("Erro ao renderizar para HTML o arquivo " + mdFile, ex);
+                    throw new IllegalStateException("Erro ao renderizar para HTML o arquivo " + chapterRaw, ex);
                 }
-
             });
         } catch (IOException ex) {
-            throw new IllegalStateException("Erro tentando encontrar arquivos .md em " + options.sourceDir().toAbsolutePath(), ex);
+            throw new IllegalStateException("Erro ao gerar PDF em" + ebook.getFileName().toAbsolutePath(), ex);
         }
     }
 }

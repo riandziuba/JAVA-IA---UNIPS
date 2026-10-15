@@ -79,7 +79,7 @@ public class OptionsService {
                 Files.deleteIfExists(outputFileName);
             }
 
-            return new OptionsDTO(sourceDir, format, outputFileName, verboseMode);
+            return new OptionsDTO(sourceDir, EbookFormat.getType(format), outputFileName, verboseMode);
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
             if (verboseMode) {

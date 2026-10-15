@@ -20,8 +20,8 @@ public class EPUBEBookService implements IEBookService {
         try {
             var epub = new Book();
 
-            epub.getMetadata().addTitle(ebook.getTitle());
-            epub.getMetadata().addAuthor(new Author(escape(ebook.getAuthor())));
+            epub.getMetadata().addTitle(ebook.title());
+            epub.getMetadata().addAuthor(new Author(escape(ebook.author())));
 
             boolean[] ehPrimeiroCapitulo = {true};
 
@@ -38,9 +38,9 @@ public class EPUBEBookService implements IEBookService {
                                   %s
                                 </body>
                               </html>
-                            """.formatted(escape(chapterRaw.getTitle()), escape(chapterRaw.getHtml()));
+                            """.formatted(escape(chapterRaw.title()), escape(chapterRaw.html()));
                     var chapter = new Resource(epubHtml.getBytes(), MediatypeService.XHTML);
-                    epub.addSection(escape(chapterRaw.getTitle()), chapter);
+                    epub.addSection(escape(chapterRaw.title()), chapter);
 
                     if (ehPrimeiroCapitulo[0]) {
                         epub.getGuide().addReference(new GuideReference(chapter, "text", "Start Reading"));
@@ -48,7 +48,7 @@ public class EPUBEBookService implements IEBookService {
                     }
 
                 } catch (Exception ex) {
-                    throw new IllegalStateException("Erro ao renderizar para HTML o arquivo " + chapterRaw.getMarkDownFile(), ex);
+                    throw new IllegalStateException("Erro ao renderizar para HTML o arquivo " + chapterRaw.markdown().markDownFile(), ex);
                 }
             });
 
@@ -56,13 +56,13 @@ public class EPUBEBookService implements IEBookService {
             var epubWriter = new EpubWriter();
 
             try {
-                epubWriter.write(epub, Files.newOutputStream(ebook.getFileName()));
+                epubWriter.write(epub, Files.newOutputStream(ebook.fileName()));
             } catch (IOException ex) {
-                throw new IllegalStateException("Erro ao criar arquivo EPUB: " + ebook.getFileName().toAbsolutePath(), ex);
+                throw new IllegalStateException("Erro ao criar arquivo EPUB: " + ebook.fileName().toAbsolutePath(), ex);
             }
 
         } catch (Exception ex) {
-            throw new IllegalStateException("Erro ao gerar EPUB: " + ebook.getFileName().toAbsolutePath(), ex);
+            throw new IllegalStateException("Erro ao gerar EPUB: " + ebook.fileName().toAbsolutePath(), ex);
         }
     }
 

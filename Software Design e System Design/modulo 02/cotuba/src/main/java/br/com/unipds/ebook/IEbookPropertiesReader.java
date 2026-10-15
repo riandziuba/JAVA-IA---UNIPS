@@ -1,7 +1,9 @@
 package br.com.unipds.ebook;
 
+import br.com.unipds.EBookInfoDTO;
+
 import java.nio.file.Path;
 
 public interface IEbookPropertiesReader {
-    void read(Path sourceDir, Ebook ebook);
+    EBookInfoDTO read(Path sourceDir);
 }

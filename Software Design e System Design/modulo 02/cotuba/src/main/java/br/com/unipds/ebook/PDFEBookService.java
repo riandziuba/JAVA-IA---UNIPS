@@ -22,17 +22,17 @@ import java.util.List;
 public class PDFEBookService implements IEBookService {
 
     public void generate(Ebook ebook) {
-        try (var writer = new PdfWriter(Files.newOutputStream(ebook.getFileName()));
+        try (var writer = new PdfWriter(Files.newOutputStream(ebook.fileName()));
              var pdf = new PdfDocument(writer);
              var pdfDocument = new Document(pdf)) {
 
-            pdf.getDocumentInfo().setTitle(ebook.getTitle());
-            pdf.getDocumentInfo().setAuthor(ebook.getAuthor());
+            pdf.getDocumentInfo().setTitle(ebook.title());
+            pdf.getDocumentInfo().setAuthor(ebook.author());
 
             ebook.getAllChapters().forEach(chapterRaw -> {
                 try {
 
-                    List<IElement> convertToElements = HtmlConverter.convertToElements(chapterRaw.getHtml());
+                    List<IElement> convertToElements = HtmlConverter.convertToElements(chapterRaw.html());
 
                     if (pdf.getNumberOfPages() == 0) {
                         pdf.addNewPage();
@@ -45,7 +45,7 @@ public class PDFEBookService implements IEBookService {
                         rootOutline = pdf.getOutlines(false);
                     }
 
-                    PdfOutline chapterOutline = rootOutline.addOutline(chapterRaw.getTitle());
+                    PdfOutline chapterOutline = rootOutline.addOutline(chapterRaw.title());
                     chapterOutline.addDestination(PdfExplicitDestination.createFit(pdf.getLastPage()));
 
                     for (IElement element : convertToElements) {
@@ -58,7 +58,7 @@ public class PDFEBookService implements IEBookService {
                 }
             });
         } catch (IOException ex) {
-            throw new IllegalStateException("Erro ao gerar PDF em" + ebook.getFileName().toAbsolutePath(), ex);
+            throw new IllegalStateException("Erro ao gerar PDF em" + ebook.fileName().toAbsolutePath(), ex);
         }
     }
 }

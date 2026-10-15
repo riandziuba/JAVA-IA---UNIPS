@@ -1,5 +1,6 @@
 package br.com.unipds.ebook;
 
+import br.com.unipds.EBookInfoDTO;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.util.Properties;
 @ApplicationScoped
 public class EbookPropertiesReaderFile implements IEbookPropertiesReader {
 
-    public void read(Path sourceDir, Ebook ebook) {
+    public EBookInfoDTO read(Path sourceDir) {
         Path propertiesFile = sourceDir.resolve("ebook.properties");
 
         if(!Files.exists(propertiesFile)) {
@@ -27,8 +28,7 @@ public class EbookPropertiesReaderFile implements IEbookPropertiesReader {
             validateProperty(title, propertyTitle);
             String author = properties.getProperty(propertyAuthor);
             validateProperty(author, propertyTitle);
-            ebook.setTitle(title);
-            ebook.setAuthor(author);
+            return new EBookInfoDTO(title, author);
         } catch (IOException e) {
             throw new IllegalStateException("Erro ao ler o arquivo: " + propertiesFile);
         }

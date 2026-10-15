@@ -16,7 +16,7 @@ public class HTMLEBookService implements IEBookService {
 
     @Override
     public void generate(Ebook ebook) {
-        Path outputDir = resolveOutputDir(ebook.getFileName());
+        Path outputDir = resolveOutputDir(ebook.fileName());
 
         try {
             Files.createDirectories(outputDir);
@@ -52,8 +52,8 @@ public class HTMLEBookService implements IEBookService {
                     %s
                   </body>
                 </html>
-                """.formatted(escape(chapter.getTitle()), escape(ebook.getTitle()),
-                chapter.getHtml());
+                """.formatted(escape(chapter.title()), escape(ebook.title()),
+                chapter.html());
     }
 
     private String renderIndex(Ebook ebook, List<Chapter> chapters, List<String> chapterFileNames) {
@@ -62,7 +62,7 @@ public class HTMLEBookService implements IEBookService {
             summary.append("      <li><a href=\"")
                     .append(chapterFileNames.get(i))
                     .append("\">")
-                    .append(escape(chapters.get(i).getTitle()))
+                    .append(escape(chapters.get(i).title()))
                     .append("</a></li>\n");
         }
         summary.append("    </ul>");
@@ -81,8 +81,8 @@ public class HTMLEBookService implements IEBookService {
                     %s
                   </body>
                 </html>
-                """.formatted(escape(ebook.getTitle()), escape(ebook.getTitle()),
-                escape(ebook.getAuthor()), summary);
+                """.formatted(escape(ebook.title()), escape(ebook.title()),
+                escape(ebook.author()), summary);
     }
 
     private Path resolveOutputDir(Path outputFileName) {

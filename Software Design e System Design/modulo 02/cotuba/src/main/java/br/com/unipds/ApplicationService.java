@@ -28,12 +28,10 @@ public class ApplicationService implements IApplicationService {
     }
 
     public void processEbook(OptionsDTO options) {
-        List<Chapter> chapters = this.markdownRepository.getChapters(options.sourceDir());
-        markdownRenderizerService.render(chapters);
-        Ebook ebook = new Ebook();
-        ebook.addChapters(chapters);
-        ebook.setFileName(options.outputFileName());
-        this.ebookPropertiesReader.read(options.sourceDir(), ebook);
+        List<Markdown> markdowns = this.markdownRepository.getChapters(options.sourceDir());
+        List<Chapter> chapters = markdownRenderizerService.render(markdowns);
+        EBookInfoDTO eBookInfoDTO = this.ebookPropertiesReader.read(options.sourceDir());
+        Ebook ebook = new Ebook(eBookInfoDTO.title(), eBookInfoDTO.author(), chapters, options.outputFileName());
         IEBookService eBookService = ebookServices.select(new EbookFormatFilter(options.format())).get();
         eBookService.generate(ebook);
     }

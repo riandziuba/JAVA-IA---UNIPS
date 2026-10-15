@@ -1,8 +1,8 @@
 package br.com.unipds.ebook;
 
 
+import br.com.unipds.options.EbookFormat;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Named;
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.GuideReference;
@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 @ApplicationScoped
-@Named("EPUB")
+@EbookFormatQualifier(EbookFormat.EPUB)
 public class EPUBEBookService implements IEBookService {
     public void generate(Ebook ebook) {
         try {

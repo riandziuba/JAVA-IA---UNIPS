@@ -18,7 +18,7 @@ public class OptionsUserInputService implements IOptionsService {
                 "Diretório que contém os arquivos md. Default: diretório atual."));
 
         options.addOption(new Option("f", "format", true,
-                "Formato de saída do ebook. Pode ser: pdf ou epub. Default: pdf"));
+                "Formato de saída do ebook. Pode ser: pdf, epub ou html. Default: pdf"));
 
         options.addOption(new Option("o", "output", true,
                 "Arquivo de saída do ebook. Default: book.{formato}."));

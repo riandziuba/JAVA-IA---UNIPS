@@ -10,15 +10,15 @@ import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.IBlockElement;
 import com.itextpdf.layout.element.IElement;
 import com.itextpdf.layout.properties.AreaBreakType;
+import br.com.unipds.options.EbookFormat;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Named;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
 @ApplicationScoped
-@Named("PDF")
+@EbookFormatQualifier(EbookFormat.PDF)
 public class PDFEBookService implements IEBookService {
 
     public void generate(Ebook ebook) {

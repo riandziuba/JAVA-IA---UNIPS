@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: jacquetech/unipdi-frontend
+          image: riandziuba/unipdi-frontend-infra
           ports:
             - containerPort: 80
           env:

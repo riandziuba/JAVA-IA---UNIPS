@@ -8,24 +8,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AdministrativeApplication implements CommandLineRunner {
+public class AdministrativeApplication {
 
-	private final JdbcAccess jdbcAccess;
-	private final AddressRepository addressRepository;
-	private final JpaDemo jpaDemo;
-
-	public AdministrativeApplication(JdbcAccess jdbcAccess, AddressRepository addressRepository, JpaDemo jpaDemo) {
-		this.jdbcAccess = jdbcAccess;
-		this.addressRepository = addressRepository;
-		this.jpaDemo = jpaDemo;
+	public AdministrativeApplication() {
 	}
 
-    public static void main(String[] args) {
+	static void main(String[] args) {
 		SpringApplication.run(AdministrativeApplication.class, args);
-	}
-
-	@Override
-	public void run(String... args) throws Exception {
-		jpaDemo.findSignatureWithPlan();
 	}
 }

@@ -1,0 +1,1 @@
+ALTER TABLE plan ADD column description varchar(500);

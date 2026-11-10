@@ -6,6 +6,7 @@ import dev.rdziuba.javify.administrative.dto.PlanResponse;
 import dev.rdziuba.javify.administrative.repository.PlanRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -61,6 +62,20 @@ public class PlanService {
             throw new EntityNotFoundException("Plan not found: " + id);
         }
         planRepository.deleteById(id);
+    }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void demonstrateRepeatableRead(Integer planId) throws InterruptedException {
+        var firstPrice = planRepository.searchPriceForId(planId);
+
+        System.out.println("First read: " + firstPrice);
+        System.out.println("Update the price on Dbeaver e execute the commit...");
+
+        Thread.sleep(15_000);
+
+        var secondPrice = planRepository.searchPriceForId(planId);
+
+        System.out.println("Second read: " + secondPrice);
     }
 
     private PlanResponse toResponse(Plan plan) {

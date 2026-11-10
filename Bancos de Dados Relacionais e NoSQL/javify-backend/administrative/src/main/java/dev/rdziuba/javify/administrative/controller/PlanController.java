@@ -52,4 +52,10 @@ public class PlanController {
         planService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/isolation")
+    public ResponseEntity<Void> testIsolation() throws InterruptedException {
+        planService.demonstrateRepeatableRead(2);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -30,6 +30,6 @@ public record Album (
                      List<ArtistParticipant> artists,
 
                      @Valid
-                     List<Track> tracks) {
+                     List<AlbumTrack> tracks) {
 
 }

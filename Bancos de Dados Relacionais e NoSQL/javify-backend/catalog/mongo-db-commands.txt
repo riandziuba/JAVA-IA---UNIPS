@@ -1,0 +1,685 @@
+$ docker compose up -d
+[+] Running 1/1
+ ✔ Container javify-mongodb  Started
+
+$ docker exec -it javify-mongodb mongosh -u admin -p adminpassword
+
+Current Mongosh Log ID: 6a21e3995003ecb28cd1a7ba
+Connecting to:          mongodb://<credentials>@127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.8.3
+Using MongoDB:          8.2.9
+Using Mongosh:          2.8.3
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+------
+   The server generated these startup warnings when booting
+   2026-06-04T20:24:14.943+00:00: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem
+   2026-06-04T20:24:15.202+00:00: For customers running the current memory allocator, we suggest changing the contents of the following sysfsFile
+   2026-06-04T20:24:15.202+00:00: We suggest setting the contents of sysfsFile to 0.
+   2026-06-04T20:24:15.202+00:00: We suggest setting swappiness to 0 or 1, as swapping can cause performance problems.
+------
+
+test> use javify_db;
+switched to db javify_db
+
+javify_db> db.albums.insertOne({
+|   "title": "Dark Side of the Moon",
+|   "releaseYear": 1973,
+|   "genre": "Progressive Rock",
+|   "artists": [
+|     { "name": "Pink Floyd", "role": "Banda Principal" }
+|   ],
+|   "tracks": [
+|     { "number": 1, "title": "Speak to Me", "durationSeconds": 65 },
+|     { "number": 2, "title": "Breathe", "durationSeconds": 163 }
+|   ]
+| });
+|
+{
+  acknowledged: true,
+  insertedId: ObjectId('6a21e39d5003ecb28cd1a7bb')
+}
+
+javify_db> db.albums.find()
+[
+  {
+    _id: ObjectId('6a21e39d5003ecb28cd1a7bb'),
+    title: 'Dark Side of the Moon',
+    releaseYear: 1973,
+    genre: 'Progressive Rock',
+    artists: [ { name: 'Pink Floyd', role: 'Banda Principal' } ],
+    tracks: [
+      { number: 1, title: 'Speak to Me', durationSeconds: 65 },
+      { number: 2, title: 'Breathe', durationSeconds: 163 }
+    ]
+  }
+]
+
+javify_db> db.albums.find({ "title": "Dark Side of the Moon" });
+|
+[
+  {
+    _id: ObjectId('6a21e39d5003ecb28cd1a7bb'),
+    title: 'Dark Side of the Moon',
+    releaseYear: 1973,
+    genre: 'Progressive Rock',
+    artists: [ { name: 'Pink Floyd', role: 'Banda Principal' } ],
+    tracks: [
+      { number: 1, title: 'Speak to Me', durationSeconds: 65 },
+      { number: 2, title: 'Breathe', durationSeconds: 163 }
+    ]
+  }
+]
+
+javify_db> db.albums.find({ "artists.name": "Pink Floyd" });
+|
+[
+  {
+    _id: ObjectId('6a21e39d5003ecb28cd1a7bb'),
+    title: 'Dark Side of the Moon',
+    releaseYear: 1973,
+    genre: 'Progressive Rock',
+    artists: [ { name: 'Pink Floyd', role: 'Banda Principal' } ],
+    tracks: [
+      { number: 1, title: 'Speak to Me', durationSeconds: 65 },
+      { number: 2, title: 'Breathe', durationSeconds: 163 }
+    ]
+  }
+]
+
+javify_db> db.albums.createIndex({"title": 1})
+title_1
+
+javify_db> db.albums.deleteMany({});
+{ acknowledged: true, deletedCount: 2 }
+
+javify_db> db.tracks.insertMany([
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a210"),
+              "title": "Speak to Me",
+              "durationSeconds": 65,
+              "audioFileUrl": "s3://javify/musicas/dark_side/speak_to_me.mp3",
+              "isrc": "GBAYE7300020",
+              "totalPlays": 345001200,
+              "explicitContent": false,
+              "lyricsUrl": null,
+              "bpm": 92,
+              "energy": 0.20,
+              "instrumental": true,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a7bc"),
+                "title": "Dark Side of the Moon",
+                "coverUrl": "cdn.javify.com/capas/dark_side.jpg"
+              },
+              "artists": [{ "name": "Pink Floyd", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a211"),
+              "title": "Breathe (In the Air)",
+              "durationSeconds": 163,
+              "audioFileUrl": "s3://javify/musicas/dark_side/breathe.mp3",
+              "isrc": "GBAYE7300021",
+              "totalPlays": 845000231,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/dark_side/breathe.lrc",
+              "bpm": 165,
+              "energy": 0.45,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a7bc"),
+                "title": "Dark Side of the Moon",
+                "coverUrl": "cdn.javify.com/capas/dark_side.jpg"
+              },
+              "artists": [{ "name": "Pink Floyd", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a212"),
+              "title": "On the Run",
+              "durationSeconds": 225,
+              "audioFileUrl": "s3://javify/musicas/dark_side/on_the_run.mp3",
+              "isrc": "GBAYE7300022",
+              "totalPlays": 210450900,
+              "explicitContent": false,
+              "lyricsUrl": null,
+              "bpm": 166,
+              "energy": 0.72,
+              "instrumental": true,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a7bc"),
+                "title": "Dark Side of the Moon",
+                "coverUrl": "cdn.javify.com/capas/dark_side.jpg"
+              },
+              "artists": [{ "name": "Pink Floyd", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a213"),
+              "title": "Time",
+              "durationSeconds": 413,
+              "audioFileUrl": "s3://javify/musicas/dark_side/time.mp3",
+              "isrc": "GBAYE7300023",
+              "totalPlays": 912300450,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/dark_side/time.lrc",
+              "bpm": 120,
+              "energy": 0.58,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a7bc"),
+                "title": "Dark Side of the Moon",
+                "coverUrl": "cdn.javify.com/capas/dark_side.jpg"
+              },
+              "artists": [{ "name": "Pink Floyd", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a214"),
+              "title": "The Great Gig in the Sky",
+              "durationSeconds": 283,
+              "audioFileUrl": "s3://javify/musicas/dark_side/the_great_gig.mp3",
+              "isrc": "GBAYE7300024",
+              "totalPlays": 540210330,
+              "explicitContent": false,
+              "lyricsUrl": null,
+              "bpm": 98,
+              "energy": 0.42,
+              "instrumental": true,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a7bc"),
+                "title": "Dark Side of the Moon",
+                "coverUrl": "cdn.javify.com/capas/dark_side.jpg"
+              },
+              "artists": [{ "name": "Pink Floyd", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a215"),
+              "title": "Money",
+              "durationSeconds": 382,
+              "audioFileUrl": "s3://javify/musicas/dark_side/money.mp3",
+              "isrc": "GBAYE7300025",
+              "totalPlays": 1205400320,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/dark_side/money.lrc",
+              "bpm": 122,
+              "energy": 0.65,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a7bc"),
+                "title": "Dark Side of the Moon",
+                "coverUrl": "cdn.javify.com/capas/dark_side.jpg"
+              },
+              "artists": [{ "name": "Pink Floyd", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a216"),
+              "title": "Us and Them",
+              "durationSeconds": 469,
+              "audioFileUrl": "s3://javify/musicas/dark_side/us_and_them.mp3",
+              "isrc": "GBAYE7300026",
+              "totalPlays": 670320110,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/dark_side/us_and_them.lrc",
+              "bpm": 78,
+              "energy": 0.38,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a7bc"),
+                "title": "Dark Side of the Moon",
+                "coverUrl": "cdn.javify.com/capas/dark_side.jpg"
+              },
+              "artists": [{ "name": "Pink Floyd", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a217"),
+              "title": "Any Colour You Like",
+              "durationSeconds": 206,
+              "audioFileUrl": "s3://javify/musicas/dark_side/any_colour.mp3",
+              "isrc": "GBAYE7300027",
+              "totalPlays": 198200440,
+              "explicitContent": false,
+              "lyricsUrl": null,
+              "bpm": 136,
+              "energy": 0.70,
+              "instrumental": true,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a7bc"),
+                "title": "Dark Side of the Moon",
+                "coverUrl": "cdn.javify.com/capas/dark_side.jpg"
+              },
+              "artists": [{ "name": "Pink Floyd", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a218"),
+              "title": "Brain Damage",
+              "durationSeconds": 226,
+              "audioFileUrl": "s3://javify/musicas/dark_side/brain_damage.mp3",
+              "isrc": "GBAYE7300028",
+              "totalPlays": 450110320,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/dark_side/brain_damage.lrc",
+              "bpm": 115,
+              "energy": 0.52,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a7bc"),
+                "title": "Dark Side of the Moon",
+                "coverUrl": "cdn.javify.com/capas/dark_side.jpg"
+              },
+              "artists": [{ "name": "Pink Floyd", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a219"),
+              "title": "Eclipse",
+              "durationSeconds": 133,
+              "audioFileUrl": "s3://javify/musicas/dark_side/eclipse.mp3",
+              "isrc": "GBAYE7300029",
+              "totalPlays": 510900430,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/dark_side/eclipse.lrc",
+              "bpm": 131,
+              "energy": 0.68,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a7bc"),
+                "title": "Dark Side of the Moon",
+                "coverUrl": "cdn.javify.com/capas/dark_side.jpg"
+              },
+              "artists": [{ "name": "Pink Floyd", "role": "Banda Principal" }]
+            }
+           ]);
+
+javify_db> db.albums.insertOne({
+                        "_id": ObjectId("6a21fda5c386542b4fd1a7bc"),
+                        "title": "Dark Side of the Moon",
+                        "releaseYear": 1973,
+                        "genre": "Progressive Rock",
+                        "coverUrl": "cdn.javify.com/capas/dark_side.jpg",
+                        "artists": [{ "name": "Pink Floyd", "role": "Banda Principal" }],
+                        "tracks": [
+                          { "_id": ObjectId("6a21fda5c386542b4fd1a210"), "number": 1, "title": "Speak to Me", "durationSeconds": 65 },
+                          { "_id": ObjectId("6a21fda5c386542b4fd1a211"), "number": 2, "title": "Breathe (In the Air)", "durationSeconds": 163 },
+                          { "_id": ObjectId("6a21fda5c386542b4fd1a212"), "number": 3, "title": "On the Run", "durationSeconds": 225 },
+                          { "_id": ObjectId("6a21fda5c386542b4fd1a213"), "number": 4, "title": "Time", "durationSeconds": 413 },
+                          { "_id": ObjectId("6a21fda5c386542b4fd1a214"), "number": 5, "title": "The Great Gig in the Sky", "durationSeconds": 283 },
+                          { "_id": ObjectId("6a21fda5c386542b4fd1a215"), "number": 6, "title": "Money", "durationSeconds": 382 },
+                          { "_id": ObjectId("6a21fda5c386542b4fd1a216"), "number": 7, "title": "Us and Them", "durationSeconds": 469 },
+                          { "_id": ObjectId("6a21fda5c386542b4fd1a217"), "number": 8, "title": "Any Colour You Like", "durationSeconds": 206 },
+                          { "_id": ObjectId("6a21fda5c386542b4fd1a218"), "number": 9, "title": "Brain Damage", "durationSeconds": 226 },
+                          { "_id": ObjectId("6a21fda5c386542b4fd1a219"), "number": 10, "title": "Eclipse", "durationSeconds": 133 }
+                        ]
+                      });
+
+javify_db> db.tracks.insertMany([
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a801"),
+              "title": "Come Together",
+              "durationSeconds": 259,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/come_together.mp3",
+              "isrc": "GBAYE6900001",
+              "totalPlays": 1540200100,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/abbey_road/come_together.lrc",
+              "bpm": 82,
+              "energy": 0.45,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a802"),
+              "title": "Something",
+              "durationSeconds": 182,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/something.mp3",
+              "isrc": "GBAYE6900002",
+              "totalPlays": 1120400500,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/abbey_road/something.lrc",
+              "bpm": 133,
+              "energy": 0.35,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a803"),
+              "title": "Maxwell's Silver Hammer",
+              "durationSeconds": 207,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/maxwells_silver_hammer.mp3",
+              "isrc": "GBAYE6900003",
+              "totalPlays": 340500100,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/abbey_road/maxwells.lrc",
+              "bpm": 131,
+              "energy": 0.50,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a804"),
+              "title": "Oh! Darling",
+              "durationSeconds": 206,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/oh_darling.mp3",
+              "isrc": "GBAYE6900004",
+              "totalPlays": 450120000,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/abbey_road/oh_darling.lrc",
+              "bpm": 174,
+              "energy": 0.60,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a805"),
+              "title": "Octopus's Garden",
+              "durationSeconds": 171,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/octopus_garden.mp3",
+              "isrc": "GBAYE6900005",
+              "totalPlays": 510900200,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/abbey_road/octopus.lrc",
+              "bpm": 180,
+              "energy": 0.65,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a806"),
+              "title": "I Want You (She's So Heavy)",
+              "durationSeconds": 467,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/i_want_you.mp3",
+              "isrc": "GBAYE6900006",
+              "totalPlays": 290100400,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/abbey_road/i_want_you.lrc",
+              "bpm": 113,
+              "energy": 0.75,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a807"),
+              "title": "Here Comes the Sun",
+              "durationSeconds": 185,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/here_comes_the_sun.mp3",
+              "isrc": "GBAYE6900007",
+              "totalPlays": 1950200100,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/abbey_road/here_comes_the_sun.lrc",
+              "bpm": 129,
+              "energy": 0.55,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a808"),
+              "title": "Because",
+              "durationSeconds": 165,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/because.mp3",
+              "isrc": "GBAYE6900008",
+              "totalPlays": 210500100,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/abbey_road/because.lrc",
+              "bpm": 84,
+              "energy": 0.25,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a809"),
+              "title": "You Never Give Me Your Money",
+              "durationSeconds": 242,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/you_never.mp3",
+              "isrc": "GBAYE6900009",
+              "totalPlays": 180400200,
+              "explicitContent": false,
+              "lyricsUrl": null,
+              "bpm": 87,
+              "energy": 0.40,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a80a"),
+              "title": "Sun King",
+              "durationSeconds": 146,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/sun_king.mp3",
+              "isrc": "GBAYE6900010",
+              "totalPlays": 110200100,
+              "explicitContent": false,
+              "lyricsUrl": null,
+              "bpm": 74,
+              "energy": 0.30,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a80b"),
+              "title": "Mean Mr. Mustard",
+              "durationSeconds": 66,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/mean_mr_mustard.mp3",
+              "isrc": "GBAYE6900011",
+              "totalPlays": 140500200,
+              "explicitContent": false,
+              "lyricsUrl": null,
+              "bpm": 95,
+              "energy": 0.55,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a80c"),
+              "title": "Polythene Pam",
+              "durationSeconds": 72,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/polythene_pam.mp3",
+              "isrc": "GBAYE6900012",
+              "totalPlays": 135400200,
+              "explicitContent": false,
+              "lyricsUrl": null,
+              "bpm": 88,
+              "energy": 0.65,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a80d"),
+              "title": "She Came In Through the Bathroom Window",
+              "durationSeconds": 117,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/she_came_in.mp3",
+              "isrc": "GBAYE6900013",
+              "totalPlays": 165800300,
+              "explicitContent": false,
+              "lyricsUrl": null,
+              "bpm": 134,
+              "energy": 0.70,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a80e"),
+              "title": "Golden Slumbers",
+              "durationSeconds": 91,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/golden_slumbers.mp3",
+              "isrc": "GBAYE6900014",
+              "totalPlays": 310500100,
+              "explicitContent": false,
+              "lyricsUrl": "s3://javify/letras/abbey_road/golden_slumbers.lrc",
+              "bpm": 78,
+              "energy": 0.45,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a80f"),
+              "title": "Carry That Weight",
+              "durationSeconds": 96,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/carry_that_weight.mp3",
+              "isrc": "GBAYE6900015",
+              "totalPlays": 240100200,
+              "explicitContent": false,
+              "lyricsUrl": null,
+              "bpm": 79,
+              "energy": 0.70,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a810"),
+              "title": "The End",
+              "durationSeconds": 139,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/the_end.mp3",
+              "isrc": "GBAYE6900016",
+              "totalPlays": 260300100,
+              "explicitContent": false,
+              "lyricsUrl": null,
+              "bpm": 132,
+              "energy": 0.85,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            },
+            {
+              "_id": ObjectId("6a21fda5c386542b4fd1a811"),
+              "title": "Her Majesty",
+              "durationSeconds": 23,
+              "audioFileUrl": "s3://javify/musicas/abbey_road/her_majesty.mp3",
+              "isrc": "GBAYE6900017",
+              "totalPlays": 180500100,
+              "explicitContent": false,
+              "lyricsUrl": null,
+              "bpm": 95,
+              "energy": 0.25,
+              "instrumental": false,
+              "album": {
+                "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+                "title": "Abbey Road",
+                "coverUrl": "cdn.javify.com/capas/abbey_road.jpg"
+              },
+              "artists": [{ "name": "The Beatles", "role": "Banda Principal" }]
+            }
+           ]);
+
+javify_db> db.albums.insertOne({
+            "_id": ObjectId("6a21fda5c386542b4fd1a800"),
+            "title": "Abbey Road",
+            "releaseYear": 1969,
+            "genre": "Classic Rock",
+            "coverUrl": "cdn.javify.com/capas/abbey_road.jpg",
+            "artists": [{ "name": "The Beatles", "role": "Banda Principal" }],
+            "tracks": [
+              { "_id": ObjectId("6a21fda5c386542b4fd1a801"), "number": 1, "title": "Come Together", "durationSeconds": 259 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a802"), "number": 2, "title": "Something", "durationSeconds": 182 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a803"), "number": 3, "title": "Maxwell's Silver Hammer", "durationSeconds": 207 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a804"), "number": 4, "title": "Oh! Darling", "durationSeconds": 206 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a805"), "number": 5, "title": "Octopus's Garden", "durationSeconds": 171 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a806"), "number": 6, "title": "I Want You (She's So Heavy)", "durationSeconds": 467 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a807"), "number": 7, "title": "Here Comes the Sun", "durationSeconds": 185 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a808"), "number": 8, "title": "Because", "durationSeconds": 165 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a809"), "number": 9, "title": "You Never Give Me Your Money", "durationSeconds": 242 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a80a"), "number": 10, "title": "Sun King", "durationSeconds": 146 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a80b"), "number": 11, "title": "Mean Mr. Mustard", "durationSeconds": 66 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a80c"), "number": 12, "title": "Polythene Pam", "durationSeconds": 72 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a80d"), "number": 13, "title": "She Came In Through the Bathroom Window", "durationSeconds": 117 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a80e"), "number": 14, "title": "Golden Slumbers", "durationSeconds": 91 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a80f"), "number": 15, "title": "Carry That Weight", "durationSeconds": 96 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a810"), "number": 16, "title": "The End", "durationSeconds": 139 },
+              { "_id": ObjectId("6a21fda5c386542b4fd1a811"), "number": 17, "title": "Her Majesty", "durationSeconds": 23 }
+            ]
+           });
+
+
+javify_db> db.albums.aggregate([
+ {
+     $match: {
+         genre: /rock/i
+     }
+ },
+ {
+     $unwind: "$tracks"
+ },
+ {
+     $group: {
+         _id: "Rock",
+         totalDurationSeconds: {
+             $sum: "$tracks.durationSeconds"
+         },
+         totalTracks: {
+             $sum: 1
+         }
+     }
+ }
+ ]);

@@ -2,6 +2,10 @@ package br.com.unipds.javify.catalog.controller;
 
 import br.com.unipds.javify.catalog.domain.Album;
 import br.com.unipds.javify.catalog.service.AlbumService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -19,11 +23,12 @@ public class AlbumController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Album>> listAll(@RequestParam(required = false) String title) {
+    public ResponseEntity<Page<Album>> listAll(@RequestParam(required = false) String title,
+                                               @PageableDefault(size = 5, page = 0, sort = "releaseYear", direction = Sort.Direction.DESC) Pageable pageable) {
         if (StringUtils.hasText(title)) {
-            return ResponseEntity.ok(albumService.searchByTitle(title));
+            return ResponseEntity.ok(albumService.searchByTitle(title, pageable));
         }
-        return ResponseEntity.ok(albumService.findAll());
+        return ResponseEntity.ok(albumService.findAll(pageable));
     }
 
     @GetMapping("/{id}")

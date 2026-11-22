@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Document(collection = "albums")
@@ -30,6 +31,6 @@ public record Album (
                      List<ArtistParticipant> artists,
 
                      @Valid
-                     List<AlbumTrack> tracks) {
+                     List<AlbumTrack> tracks) implements Serializable {
 
 }

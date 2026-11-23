@@ -7,9 +7,14 @@ import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
 @PrimaryKeyClass
 public record PlayHistoryKey(
-        @PrimaryKeyColumn(name = "user_id", type = PrimaryKeyType.PARTITIONED) Long userId,
-        @PrimaryKeyColumn(name = "played_time", type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)LocalDateTime played_time
-) implements Serializable {
-}
+
+        @PrimaryKeyColumn(name = "user_id", type = PrimaryKeyType.PARTITIONED)
+        Long userId,
+
+        @PrimaryKeyColumn(name = "played_time", type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
+        LocalDateTime playedTime
+
+) implements Serializable { }

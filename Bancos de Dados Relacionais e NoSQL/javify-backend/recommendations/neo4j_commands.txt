@@ -1,0 +1,63 @@
+CREATE
+  // 1. Creating the User nodes (id: Long coming from PostgreSQL)
+  (john:User {id: 1, name: 'John', email: 'john@javify.com'}),
+  (mary:User {id: 2, name: 'Mary', email: 'mary@javify.com'}),
+  (peter:User {id: 3, name: 'Peter', email: 'peter@javify.com'}),
+  (anna:User {id: 4, name: 'Anna', email: 'anna@javify.com'}),
+
+  // 2. Creating the Artist nodes (id: String coming from MongoDB)
+  (pinkFloyd:Artist {id: '6a21fda5c386542b4fd1a801', name: 'Pink Floyd'}),
+  (ledZeppelin:Artist {id: '6a21fda5c386542b4fd1a802', name: 'Led Zeppelin'}),
+  (beatles:Artist {id: '6a21fda5c386542b4fd1a803', name: 'The Beatles'}),
+  (ironMaiden:Artist {id: '6a21fda5c386542b4fd1a804', name: 'Iron Maiden'}),
+
+  // 3. Creating the Social Network
+  (john)-[:FOLLOWS]->(mary),
+  (john)-[:FOLLOWS]->(peter),
+  (mary)-[:FOLLOWS]->(anna),
+
+  // 4. Creating the Music History
+  (mary)-[:LISTENS_TO {times_played: 50}]->(pinkFloyd),
+  (mary)-[:LISTENS_TO {times_played: 120}]->(ledZeppelin),
+  (peter)-[:LISTENS_TO {times_played: 30}]->(pinkFloyd),
+  (peter)-[:LISTENS_TO {times_played: 80}]->(beatles),
+  (anna)-[:LISTENS_TO {times_played: 200}]->(ironMaiden)
+
+
+MATCH (n) RETURN n LIMIT 25;
+
+MATCH (n:Artist) RETURN n LIMIT 25;
+
+MATCH p=()-[]->() RETURN p LIMIT 25;
+
+MATCH ()-[r:FOLLOWS]->()
+DELETE r
+
+MATCH (n: Artist)
+DELETE n
+
+MATCH (john:User {name: 'John'})
+RETURN john;
+
+MATCH (john:User {name: 'John'})-[:FOLLOWS]->(friend:User)
+RETURN friend;
+
+MATCH (john:User {name: 'John'})-[:FOLLOWS]->(friend:User)-[:LISTENS_TO]->(artist:Artist)
+RETURN artist;
+
+
+// Excludes bands that John already listens to (Iron Maiden)
+MATCH (john:User {name: 'John'})-[:FOLLOWS]->(friend:User)-[:LISTENS_TO]->(artist:Artist)
+WHERE NOT (john)-[:LISTENS_TO]->(artist)
+RETURN artist;
+
+MATCH (john:User {name: 'John'})-[:FOLLOWS]->(friend:User)-[:LISTENS_TO]->(artist:Artist)
+WHERE NOT (john)-[:LISTENS_TO]->(artist)
+RETURN artist.name, COUNT(friend) AS recommendation_strength
+ORDER BY recommendation_strength DESC
+LIMIT 5;
+
+
+MATCH (john:User {id: 1})
+MATCH (beatles:Artist {id: '6a21fda5c386542b4fd1a803'})
+MERGE (john)-[:LISTENS_TO]->(beatles)
